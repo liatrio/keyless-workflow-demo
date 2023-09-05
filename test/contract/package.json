@@ -1,0 +1,40 @@
+{
+  "name": "contract-tests",
+  "dependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-export-default-from": "^7.8.3",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/register": "^7.9.0",
+    "@pact-foundation/absolute-version": "^0.0.3",
+    "@pact-foundation/pact": "^9.15.5",
+    "babel-jest": "^27.0.6",
+    "eslint": "^7.28.0",
+    "jest": "^27.0.6",
+    "jest-pact": "^0.9.1",
+    "lint-staged": "^11.0.0",
+    "node-fetch": "^2.6.1",
+    "per-env": "^1.0.2",
+    "prettier": "^2.3.1"
+  },
+  "scripts": {
+    "test": "per-env",
+    "test:development": "jest",
+    "test:production": "jest",
+    "lint": "per-env",
+    "lint:development": "onchange --add '**/*.js' --exclude node_modules --exclude-path .gitignore --kill -- eslint --fix {{file}}",
+    "lint:production": "eslint --ext .js --ext .cjs --ignore-path .gitignore .",
+    "format": "per-env",
+    "format:development": "onchange --add '**/*.*' --exclude node_modules --exclude-path .gitignore --kill -- prettier {{file}} --write",
+    "format:production": "prettier --check .",
+    "precommit": "lint-staged",
+    "publish": "node publish.js"
+  },
+  "config": {
+    "pact_do_not_track": true
+  },
+  "type": "module",
+  "devDependencies": {
+    "eslint-config-prettier": "^8.3.0"
+  }
+}

@@ -1,0 +1,41 @@
+# This workflow builds a nodejs app. It will run on pull requests and 
+# when called from another workflow.
+
+name: Build Node Project
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_call:
+
+jobs:
+  build-node:
+    name: Build Node project
+    runs-on: ubuntu-latest
+    outputs:
+      project-version: ${{ steps.project-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit Test
+        run: npm test
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage
+          path: coverage/lcov.info
+
+      - name: Get NPM project version
+        id: project-version
+        run: echo "::set-output name=version::$(npm pkg get version | sed 's/\"//g')"

@@ -1,0 +1,24 @@
+image:
+  repository: devops-knowledge-share-ui
+  pullPolicy: IfNotPresent
+  tag: latest
+
+recreatePods: true
+
+autoscaling:
+  enabled: false
+
+apiURL: http://devops-knowledge-share-api
+
+replicaCount: 1
+
+gateway:
+  enabled: false
+
+service:
+  type: NodePort
+  nodePort: 30010
+  port: 3000
+
+featureFlags:
+  enableImageURL: false

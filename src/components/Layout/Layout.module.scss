@@ -1,0 +1,31 @@
+.navbar {
+  color: #eee;
+  background: rgb(10 10 10);
+  text-align: left;
+  display: inline-block;
+  width: 100%;
+  min-width: 960px;
+  height: auto;
+}
+
+.navbarBrand {
+  vertical-align: middle;
+  padding-right: 5px;
+}
+
+.navbarText {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.footer {
+  color: #eee;
+  background-color: black;
+  font-size: 14;
+  text-align: center;
+  display: inline-block;
+  width: 100%;
+  min-width: 960px;
+  position: absolute;
+  bottom: 0;
+}

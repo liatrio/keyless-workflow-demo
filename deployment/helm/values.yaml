@@ -1,0 +1,85 @@
+# Default values for devops-knowledge-share-ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: ""
+fullnameOverride: ""
+replicaCount: 1
+imagePullSecrets: []
+fqdn: FQDN
+environment: ENV
+teamname: TEAMNAME
+namespace: NAMESPACE
+
+image:
+  registry: $ECR_URL
+  repository: devops-knowledge-share-ui
+  pullPolicy: IfNotPresent
+  tag: latest
+
+recreatePods: false
+
+featureFlags:
+  enableImageURL: true
+
+deployment:
+  annotations:
+    exampleCompany.com/skipAppScanValidation: "public image"
+  pod:
+    annotations: {}
+
+apiURL: http://devops-knowledge-share-api
+
+gateway:
+  enabled: true
+  tlsCredentialName: ""
+
+ingressSecret:
+  enabled: false
+  certName: ""
+  publicCert: ""
+
+service:
+  annotations:
+    ad.datadoghq.com/service.check_names: '["http_check"]'
+    ad.datadoghq.com/service.init_configs: "[{}]"
+    ad.datadoghq.com/service.instances: |
+      [
+          {
+            "name": "{{ include "devops-knowledge-share-ui.name" . }}.{{ .Release.namespace }}.svc.cluster.local",
+            "url": "http://{{ include "devops-knowledge-share-ui.name" . }}.{{ .Release.namespace }}.svc.cluster.local/diagnostic/status/heartbeat",
+            "timeout": 10,
+            "http_response_status_code": "200",
+            "ignore_ssl_warning": true,
+            "disable_ssl_validation": true,
+            "check_certificate_expiration": false,
+            "tags": ["exampleCompany-di:true", "check_url_type:internal", "service:{{ include "devops-knowledge-share-ui.name" . }}"]
+          },
+          {
+            "name": "{{ .Values.fqdn }}",
+            "url": "https://{{ .Values.fqdn }}/diagnostic/status/heartbeat,
+            "timeout": 10,
+            "http_response_status_code": "200",
+            "ignore_ssl_warning": true,
+            "disable_ssl_validation": true,
+            "check_certificate_expiration": false,
+            "tags": ["exampleCompany-di:true", "check_url_type:external", "service:{{ include "devops-knowledge-share-ui.name" . }}"]
+          }
+      ]
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: 1.5
+    memory: 1Gi
+  requests:
+    cpu: 50m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 5
+  minAvailable: 1
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 70
