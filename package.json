@@ -8,7 +8,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "dockerBuild": "docker build -t $npm_package_name . --secret id=npm,src=$HOME/.npmrc",
+    "dockerBuild": "docker build -t $npm_package_name .",
     "dockerRun": "docker run -e KNOWLEDGE_SHARE_API=http://host.docker.internal:8080 -p 3000:3000 -it $npm_package_name",
     "test": "jest --coverage --coverageDirectory ./coverage",
     "testContract": "npm run test --workspace test/contract",
