@@ -1,8 +1,0 @@
-site_name: devops-knowledge-share-ui-react | dump}}
-site_description: devops-knowledge-share-ui-react | dump}}
-
-nav:
-  - Introduction: index.md
-  - SSL Cert Guide: SSL-cert-guide.md
-# plugins:
-#   - techdocs-core

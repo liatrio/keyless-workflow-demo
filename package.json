@@ -7,12 +7,9 @@
     "check-types": "tsc",
     "dev": "next dev",
     "lint": "next lint",
-    "prepare": "husky install",
     "start": "next start",
     "dockerBuild": "docker build -t $npm_package_name . --secret id=npm,src=$HOME/.npmrc",
     "dockerRun": "docker run -e KNOWLEDGE_SHARE_API=http://host.docker.internal:8080 -p 3000:3000 -it $npm_package_name",
-    "helm": "helm upgrade --install $npm_package_name deployment/helm -f deployment/helm/values-local.yaml",
-    "buildAndHelm": "npm-run-all dockerBuild helm",
     "test": "jest --coverage --coverageDirectory ./coverage",
     "testContract": "npm run test --workspace test/contract",
     "testWatch": "jest --watch",
@@ -26,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/exampleCompany/devops-knowledge-share-ui/src/master/"
+    "url": "https://github.com/liatrio/keyless-workflow-demo"
   },
   "workspaces": [
     "src",
@@ -39,9 +36,9 @@
   ],
   "author": "productcore",
   "bugs": {
-    "url": "https://bitbucket.org/exampleCompany/devops-knowledge-share-ui/src/master/"
+    "url": "https://github.com/liatrio/keyless-workflow-demo"
   },
-  "homepage": "https://bitbucket.org/exampleCompany/devops-knowledge-share-ui/src/master/",
+  "homepage": "https://github.com/liatrio/keyless-workflow-demo",
   "dependencies": {
     "bootstrap": "^5.1.3",
     "html5-history-api": "^4.2.10",

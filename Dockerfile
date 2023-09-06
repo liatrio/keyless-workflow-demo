@@ -1,9 +1,3 @@
-FROM node:16-alpine AS dev
-
-RUN apk add --no-cache zsh curl wget git openssh && \
-  sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
-  rm -rf /var/cache/apk/*
-
 FROM node:16-alpine AS builder
 
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -11,7 +5,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN --mount=type=secret,id=npm,target=/root/.npmrc npm ci
+RUN npm ci
 
 COPY src/ src/
 COPY public/ public/
@@ -20,7 +14,7 @@ COPY next-env.d.ts ./
 COPY next.config.js ./
 COPY .eslintrc.js ./
 
-RUN --mount=type=secret,id=npm,target=/root/.npmrc npm run validateBuild
+RUN npm run validateBuild
 
 RUN npm prune --production
 

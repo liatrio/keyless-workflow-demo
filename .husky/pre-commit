@@ -1,8 +1,0 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-npx lint-staged
-npm run check-types
-npm run test
-snyk test --severity-threshold=high --all-projects --prune-repeated-subdependencies
-snyk code test --severity-threshold=high --all-projects || true

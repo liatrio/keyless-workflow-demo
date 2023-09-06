@@ -1,8 +1,0 @@
-fqdn: devops-knowledge-share-ui-react-dev.nonprod.exampleCompany.com
-environment: dev
-teamname: dojo
-namespace: dojo-dev
-reponame: devops-knowledge-share-ui-react
-gateway:
-  enabled: false
-  tlsCredentialName: dojo-dev-devops-knowledge-share-ui-react-cert
