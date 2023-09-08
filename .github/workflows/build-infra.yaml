@@ -27,7 +27,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.PERSONAL_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.PERSONAL_SECRET_ACCESS_KEY }}
-          role-to-assume: ${{ vars.ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
           role-skip-session-tagging: true
 
