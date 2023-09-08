@@ -19,6 +19,6 @@ remote_state {
   }
 }
 
-terraform {
-  source = ".//tf"
-}
+# terraform {
+#   source = ".//tf"
+# }
