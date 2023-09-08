@@ -34,3 +34,19 @@ notes
 .env
 
 *.tsbuildinfo
+
+# Terragrunt/Terraform files https://raw.githubusercontent.com/gruntwork-io/terragrunt/f6ab8991f4f318343db3321691ac37fa366c8762/.gitignore
+.*.sw?
+.idea
+terragrunt.iml
+vendor
+.terraform
+.vscode
+*.tfstate
+*.tfstate.backup
+*.out
+.terragrunt-cache
+.bundle
+.ruby-version
+.terraform.lock.hcl
+terragrunt
