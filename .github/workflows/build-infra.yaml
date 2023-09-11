@@ -36,29 +36,58 @@ jobs:
 
       - name: Install jq
         run: |
-          apt install jq
+          sudo apt install jq tree
 
-      - name: Get ECR arn
+      ## Fetch output from our terraform
+      - name: Pull Terraform output into GitHub Action ENV
         run: |
-          echo "ecr_arn=`terragrunt output --json | jq .ecr_repository_arn.value -r`" >> GITHUB_OUTPUT
-        working-directory: ./terraform
+          terragrunt output --json > tmp_output.json
+          echo "ecr_repository_url=$(jq .ecr_repository_url.value -r < tmp_output.json)" >> $GITHUB_ENV
+          echo "ecs_task_arn=$(jq .ecs_task_arn.value -r < tmp_output.json)" >> $GITHUB_ENV
+          echo "ecs_service_arn=$(jq .ecs_service_arn.value -r < tmp_output.json)" >> $GITHUB_ENV
+          echo "ecs_cluster_arn=$(jq .ecs_cluster_arn.value -r < tmp_output.json)" >> $GITHUB_ENV
+          rm tmp_output.json
+        working-directory: terraform
 
       - name: Fetch ECS Repo Url
         run: |
-          echo $ECR_ARN
+          echo "${{ env.ecr_repository_url }}"
 
       # Build docker image
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Build and push
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: user/app:latest
+          tags: ${{ env.ecr_repository_url }}:latest , ${{ env.ecr_repository_url }}:${{ github.sha }}
+
+      - name: Pull task-definition.json to update ECS cluster
+        id: pull-ecs-task-definition
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.ecs_task_arn }} --region ${{ env.AWS_REGION }} --output json | jq .taskDefinition >> task-definition.json
+
+      - name: Check what task-definition.json looks like
+        run: |
+          cat task-definition.json
+
+      - name: Render Amazon ECS task definition
+        id: render-web-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: knowledgeshare-ui
+          image: ${{ env.ecr_repository_url }}:latest
+          environment-variables: "LOG_LEVEL=info"
+
+      - name: Deploy to Amazon ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-web-container.outputs.task-definition }}
+          service: ${{ env.ecs_service_arn }}
+          cluster: ${{ env.ecs_cluster_arn }}

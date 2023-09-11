@@ -2,6 +2,21 @@ data "tls_certificate" "github_thumbprint" {
   url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
 }
 
+## Uncomment this block of code if you are testing this in a personal aws account
+## This is a central resource that in my org is not managed via terraform and thus
+## including this resouce causes issues.
+# resource "aws_iam_openid_connect_provider" "github" {
+#   url = "https://token.actions.githubusercontent.com"
+
+#   # All roles go here.
+#   # You can find these in the audience of the Github OIDC tokens
+#   client_id_list = ["sts.amazonaws.com"]
+
+#   thumbprint_list = [
+#     data.tls_certificate.github_thumbprint.certificates[0].sha1_fingerprint
+#   ]
+# }
+
 data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 }

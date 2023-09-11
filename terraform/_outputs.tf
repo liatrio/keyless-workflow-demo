@@ -18,7 +18,7 @@ output "ecs_task_arn" {
   description = "ARN of the ECS task definition"
 }
 
-output "ecs_service_id" {
+output "ecs_service_arn" {
   value = aws_ecs_service.knowledgeshare_ui_service.id
-  description = "ID of the ECS Service"
+  description = "ARN of the ECS Service"
 }
