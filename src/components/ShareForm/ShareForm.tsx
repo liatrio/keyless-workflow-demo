@@ -42,7 +42,7 @@ const ShareForm = (props: Props) => {
         <div className={styles.flexChildLeft}>
           <Image
             alt="exampleCompany Logo"
-            src="/dojo-logo-sm.png"
+            src="/chico.png"
             width="400px"
             height="400px"
           />
