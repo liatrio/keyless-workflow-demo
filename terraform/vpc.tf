@@ -7,10 +7,20 @@ resource "aws_vpc" "keyless_workflow_demo_vpc" {
 }
 
 # Create a subnet
-resource "aws_subnet" "keyless_workflow_demo_subnet" {
+resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = aws_vpc.keyless_workflow_demo_vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-west-2a" # Adjust as needed
+  map_public_ip_on_launch = true # This will give instances in this subnet a public IP by default
+  tags = {
+    Name = "keyless_workflow_demo_subnet"
+  }
+}
+
+resource "aws_subnet" "public_subnet_b" {
+  vpc_id                  = aws_vpc.keyless_workflow_demo_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-west-2b" # Adjust as needed
   map_public_ip_on_launch = true # This will give instances in this subnet a public IP by default
   tags = {
     Name = "keyless_workflow_demo_subnet"
@@ -79,8 +89,13 @@ resource "aws_route_table" "keyless_workflow_demo_route_table" {
 }
 
 # Associate the route table with the subnet
-resource "aws_route_table_association" "keyless_workflow_demo_rta" {
-  subnet_id      = aws_subnet.keyless_workflow_demo_subnet.id
+resource "aws_route_table_association" "public_subnet_a_rta" {
+  subnet_id      = aws_subnet.public_subnet_a.id
+  route_table_id = aws_route_table.keyless_workflow_demo_route_table.id
+}
+
+resource "aws_route_table_association" "public_subnet_b_rta" {
+  subnet_id      = aws_subnet.public_subnet_b.id
   route_table_id = aws_route_table.keyless_workflow_demo_route_table.id
 }
 #endregion
