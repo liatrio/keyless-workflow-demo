@@ -33,10 +33,12 @@ resource "aws_lb" "front_end" {
 resource "aws_lb_target_group" "front_end_target_group" {
   name = "keyless-workflow-tg"
   port = 3000
-  path = "about"
   protocol = "HTTP"
   target_type = "ip"
   vpc_id = aws_vpc.keyless_workflow_demo_vpc.id
+  health_check {
+    path = "/about"
+  }
 }
 
 resource "aws_lb_listener" "front_end_listener" {
