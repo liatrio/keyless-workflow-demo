@@ -58,7 +58,7 @@ resource "aws_ecs_service" "knowledgeshare_ui_service" {
   desired_count = 1
   force_new_deployment = true
   network_configuration {
-    subnets         = [aws_subnet.keyless_workflow_demo_subnet.id]
+    subnets         = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
     security_groups = [aws_security_group.keyless_workflow_demo_sg.id]
     assign_public_ip = true
   }
