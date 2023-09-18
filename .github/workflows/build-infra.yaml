@@ -82,7 +82,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: knowledgeshare-ui
-          image: ${{ env.ecr_repository_url }}:latest
+          image: ${{ env.ecr_repository_url }}:${{ github.sha }}
           environment-variables: "LOG_LEVEL=info"
 
       - name: Deploy to Amazon ECS service
@@ -91,3 +91,4 @@ jobs:
           task-definition: ${{ steps.render-web-container.outputs.task-definition }}
           service: ${{ env.ecs_service_arn }}
           cluster: ${{ env.ecs_cluster_arn }}
+          force-new-deployment: true
