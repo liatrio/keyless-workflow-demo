@@ -27,12 +27,13 @@ resource "aws_lb" "front_end" {
   internal = false
   load_balancer_type = "application"
   security_groups = [aws_security_group.allow_80.id]
-  subnets = [ aws_subnet.keyless_workflow_demo_subnet.id ]
+  subnets = [ aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id ]
 }
 
 resource "aws_lb_target_group" "front_end_target_group" {
   name = "keyless-workflow-tg"
   port = 3000
+  path = "about"
   protocol = "HTTP"
   target_type = "ip"
   vpc_id = aws_vpc.keyless_workflow_demo_vpc.id
