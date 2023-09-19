@@ -9,7 +9,8 @@ resource "aws_security_group" "allow_80" {
         from_port = 80
         to_port = 80
         protocol = "tcp"
-        cidr_blocks = [ aws_vpc.keyless_workflow_demo_vpc.cidr_block ]
+        cidr_blocks = ["0.0.0.0/0"] # Allow inbound traffic on 80 from any ip
+        ipv6_cidr_blocks = ["::/0"]
     }
 
 
@@ -23,7 +24,7 @@ resource "aws_security_group" "allow_80" {
 }
 
 resource "aws_lb" "front_end" {
-  name = "fornt-end"
+  name = "front-end"
   internal = false
   load_balancer_type = "application"
   security_groups = [aws_security_group.allow_80.id]
