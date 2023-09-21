@@ -1,7 +1,3 @@
-data "tls_certificate" "github_thumbprint" {
-  url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
-}
-
 ## Uncomment this block of code if you are testing this in a personal aws account
 ## This is a central resource that in my org is not managed via terraform and thus
 ## including this resouce causes issues.
@@ -16,6 +12,10 @@ data "tls_certificate" "github_thumbprint" {
 #     data.tls_certificate.github_thumbprint.certificates[0].sha1_fingerprint
 #   ]
 # }
+
+data "tls_certificate" "github_thumbprint" {
+  url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
+}
 
 data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
@@ -35,8 +35,32 @@ resource "aws_iam_policy" "ecs_ecr_policy" {
         ],
         Resource = [
           var.ecs_cluster_arn,   # ARN of the ECS cluster
-          replace(var.ecs_task_arn, "/:\\d+$/", ":*")   # ARN of the ECS task definition
-          # Add ARNs of other ECS resources if needed
+          var.ecs_service_arn,   # ARN of the ECS service
+          replace(var.ecs_task_arn, "/:\\d+$/", ":*")   # ARN that matches all task-definition revisions for the task definition created in this repo
+        ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "ecs:DescribeTaskDefinition",
+          "ecs:RegisterTaskDefinition"
+          ],
+        Resource = [ "*" ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:PassRole"
+          ],
+        Resource = [ "*" ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "ecr:GetAuthorizationToken",
+        ],
+        Resource = [
+          "*"
         ]
       },
       {
@@ -52,6 +76,38 @@ resource "aws_iam_policy" "ecs_ecr_policy" {
   })
 }
 
+resource "aws_iam_policy" "terraform_read" {
+  name        = "terraform_read"
+  description = "Policy that gives permissions to access the backend s3 bucket the tf state file is stored"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "TerraformStateS3ReadPermissions",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${var.tfstate_bucket}",
+                "arn:aws:s3:::${var.tfstate_bucket}/*"
+            ]
+        },
+        {
+            "Sid": "TerraformStateDynamoDBReadPermissions",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:DescribeTable",
+            ],
+            "Resource": "arn:aws:dynamodb:${var.aws_region}:*:table/${var.tfstate_dynamodb_table}"
+        }
+    ]
+  })
+}
 
 data "aws_iam_policy_document" "gha_trust_policy" {
   statement {
@@ -77,5 +133,5 @@ data "aws_iam_policy_document" "gha_trust_policy" {
 resource "aws_iam_role" "gha_role" {
   name                = "gha_role"
   assume_role_policy  = data.aws_iam_policy_document.gha_trust_policy.json
-  managed_policy_arns = [aws_iam_policy.ecs_ecr_policy.arn]
+  managed_policy_arns = [aws_iam_policy.ecs_ecr_policy.arn, aws_iam_policy.terraform_read.arn]
 }
