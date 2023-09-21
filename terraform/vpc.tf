@@ -10,8 +10,8 @@ resource "aws_vpc" "keyless_workflow_demo_vpc" {
 resource "aws_subnet" "public_subnet_a" {
   vpc_id                  = aws_vpc.keyless_workflow_demo_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-west-2a" # Adjust as needed
-  map_public_ip_on_launch = true # This will give instances in this subnet a public IP by default
+  availability_zone       = "${var.aws_region}a" # Adjust as needed
+  map_public_ip_on_launch = true                 # This will give instances in this subnet a public IP by default
   tags = {
     Name = "keyless_workflow_demo_subnet"
   }
@@ -20,8 +20,8 @@ resource "aws_subnet" "public_subnet_a" {
 resource "aws_subnet" "public_subnet_b" {
   vpc_id                  = aws_vpc.keyless_workflow_demo_vpc.id
   cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-west-2b" # Adjust as needed
-  map_public_ip_on_launch = true # This will give instances in this subnet a public IP by default
+  availability_zone       = "${var.aws_region}b" # Adjust as needed
+  map_public_ip_on_launch = true                 # This will give instances in this subnet a public IP by default
   tags = {
     Name = "keyless_workflow_demo_subnet"
   }

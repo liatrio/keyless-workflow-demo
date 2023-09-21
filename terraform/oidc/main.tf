@@ -52,6 +52,59 @@ resource "aws_iam_policy" "ecs_ecr_policy" {
   })
 }
 
+# TODO see if you can trim the permissions down such that they match
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Sid": "AllowListS3ActionsOnTerraformBucket",
+#             "Effect": "Allow",
+#             "Action": "s3:ListBucket",
+#             "Resource": "arn:aws:s3:::admin-terraform-state.liatrio.com"
+#         },
+#         {
+#             "Sid": "AllowGetS3ActionsOnTerraformBucketPath",
+#             "Effect": "Allow",
+#             "Action": "s3:GetObject",
+#             "Resource": "arn:aws:s3:::admin-terraform-state.liatrio.com/*"
+#         }
+#     ]
+# }
+resource "aws_iam_policy" "terraform_read" {
+  name        = "terraform_read"
+  description = "Policy that gives permissions to access the backend s3 bucket the tf state file is stored"
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "S3BucketPermissions",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${var.tfstate_bucket}",
+                "arn:aws:s3:::${var.tfstate_bucket}/*"
+            ]
+        },
+        {
+            "Sid": "DynamoDBLockTable",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:DeleteItem"
+            ],
+            "Resource": "arn:aws:dynamodb:${var.aws_region}:*:table/${var.tfstate_dynamodb_table}"
+        }
+    ]
+  })
+}
 
 data "aws_iam_policy_document" "gha_trust_policy" {
   statement {
@@ -77,5 +130,5 @@ data "aws_iam_policy_document" "gha_trust_policy" {
 resource "aws_iam_role" "gha_role" {
   name                = "gha_role"
   assume_role_policy  = data.aws_iam_policy_document.gha_trust_policy.json
-  managed_policy_arns = [aws_iam_policy.ecs_ecr_policy.arn]
+  managed_policy_arns = [aws_iam_policy.ecs_ecr_policy.arn, aws_iam_policy.terraform_read.arn]
 }

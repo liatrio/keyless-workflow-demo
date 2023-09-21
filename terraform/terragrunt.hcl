@@ -5,11 +5,11 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket  = "keyless-workflow-demo"
-    key     = "keyless-workflow-demo/terraform.tfstate"
+    bucket  = "keyless-workflow-demo-tfstate"
+    key     = "${path_relative_to_include()}/terraform.tfstate"
 
-    region                = "us-west-2"
-    dynamodb_table        = "tflocks"
+    region                = "us-east-2"
+    dynamodb_table        = "keyless-demo-tflock"
     disable_bucket_update = true
 
     # Permissions thing
@@ -19,6 +19,12 @@ remote_state {
   }
 }
 
-# terraform {
-#   source = ".//tf"
-# }
+terraform {
+  extra_arguments "shared_vars" {
+    commands = get_terraform_commands_that_need_vars()
+    optional_var_files = [
+        "${get_parent_terragrunt_dir()}/shared.tfvars",
+        "${find_in_parent_folders("shared.tfvars", "ignore")}"
+    ]
+  }
+}
