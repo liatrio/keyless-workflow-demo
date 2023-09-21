@@ -19,6 +19,8 @@ remote_state {
   }
 }
 
+# This block will read all variables in shared.tfvars and append them
+# to all terrform commands that accept inputs
 terraform {
   extra_arguments "shared_vars" {
     commands = get_terraform_commands_that_need_vars()
