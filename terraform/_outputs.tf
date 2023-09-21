@@ -1,5 +1,5 @@
 output "ecr_repository_url" {
-  value = aws_ecr_repository.knowledgeshare_ui_ecr.repository_url
+  value       = aws_ecr_repository.knowledgeshare_ui_ecr.repository_url
   description = "URL of the ECR repository"
 }
 
@@ -14,12 +14,12 @@ output "ecs_cluster_arn" {
 }
 
 output "ecs_task_arn" {
-  value       = aws_ecs_task_definition.knowledgeshare_ui_task.arn
+  value       = data.aws_ecs_task_definition.current_task.arn
   description = "ARN of the ECS task definition"
 }
 
 output "ecs_service_arn" {
-  value = aws_ecs_service.knowledgeshare_ui_service.id
+  value       = aws_ecs_service.knowledgeshare_ui_service.id
   description = "ARN of the ECS Service"
 }
 

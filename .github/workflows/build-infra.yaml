@@ -6,10 +6,16 @@ on:
       - main
   workflow_dispatch: {}
 
+# permissions:
+#   id-token: write # Needed to modify JWT token for OIDC
+#   contents: read # Needed for actions/checkout
+
+
 jobs:
   run:
     name: run
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v3
 
@@ -26,6 +32,7 @@ jobs:
           aws-access-key-id: ${{ secrets.PERSONAL_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.PERSONAL_SECRET_ACCESS_KEY }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          # role-to-assume: ${{ vars.OIDC_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
           role-skip-session-tagging: true
 

@@ -1,7 +1,7 @@
 resource "aws_ecs_cluster" "knowledgeshare_ui_ecs_cluster" {
   name = "knowledgeshare-demo-clster"
   setting {
-    name = "containerInsights"
+    name  = "containerInsights"
     value = "enabled"
   }
 }
@@ -30,36 +30,40 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_attachment" {
 }
 
 resource "aws_ecs_task_definition" "knowledgeshare_ui_task" {
-  family = "keyless-workflow-demo"
+  family                   = "keyless-workflow-demo-td"
   network_mode             = "awsvpc" # FARGATE requires awsvpc from what I can tell
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "1024"  # Choose based on your requirements
-  memory                   = "2048"  # Choose based on your requirements
+  cpu                      = "1024"                              # Choose based on your requirements
+  memory                   = "2048"                              # Choose based on your requirements
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn # FARGATE also requires this role to fetch images from ECR
 
   container_definitions = jsonencode([{
-    name = "knowledgeshare-ui" # TODO make this a variable that can be made into output so we can fetch programatically
-    image = "${aws_ecr_repository.knowledgeshare_ui_ecr.repository_url}:latest"
+    name      = "knowledgeshare-ui" # TODO make this a variable that can be made into output so we can fetch programatically
+    image     = "${aws_ecr_repository.knowledgeshare_ui_ecr.repository_url}:latest"
     essential = true
     portMappings = [
       {
         containerPort = 3000
-        hostPort = 3000
+        hostPort      = 3000
       }
     ]
   }])
 }
 
+data "aws_ecs_task_definition" "current_task" {
+  task_definition = aws_ecs_task_definition.knowledgeshare_ui_task.family
+}
+
 resource "aws_ecs_service" "knowledgeshare_ui_service" {
-  name = "knowledgeshare_ui"
-  launch_type = "FARGATE"
-  cluster = aws_ecs_cluster.knowledgeshare_ui_ecs_cluster.id
-  task_definition = aws_ecs_task_definition.knowledgeshare_ui_task.arn
-  desired_count = 1
+  name                 = "knowledgeshare_ui"
+  launch_type          = "FARGATE"
+  cluster              = aws_ecs_cluster.knowledgeshare_ui_ecs_cluster.id
+  task_definition      = data.aws_ecs_task_definition.current_task.arn
+  desired_count        = 1
   force_new_deployment = true
   network_configuration {
-    subnets         = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
-    security_groups = [aws_security_group.keyless_workflow_demo_sg.id]
+    subnets          = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
+    security_groups  = [aws_security_group.keyless_workflow_demo_sg.id]
     assign_public_ip = true
   }
 

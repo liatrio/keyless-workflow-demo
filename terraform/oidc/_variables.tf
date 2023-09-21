@@ -14,3 +14,11 @@ variable "ecr_repository_arn" {
   description = "ARN of the ECR repository"
   type        = string
 }
+
+variable "tfstate_bucket" {}
+
+variable "tfstate_dynamodb_table" {}
+
+variable "aws_region" {}
+
+variable "ecs_service_arn" {}
