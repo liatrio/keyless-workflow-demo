@@ -6,9 +6,9 @@ on:
       - main
   workflow_dispatch: {}
 
-permissions:
-  id-token: write # Needed to modify JWT token for OIDC
-  contents: read # Needed for actions/checkout
+# permissions:
+#   id-token: write # Needed to modify JWT token for OIDC
+#   contents: read # Needed for actions/checkout
 
 
 jobs:
@@ -29,10 +29,10 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          # aws-access-key-id: ${{ secrets.PERSONAL_ACCESS_KEY }}
-          # aws-secret-access-key: ${{ secrets.PERSONAL_SECRET_ACCESS_KEY }}
-          # role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
-          role-to-assume: ${{ vars.OIDC_ROLE }}
+          aws-access-key-id: ${{ secrets.PERSONAL_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.PERSONAL_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          # role-to-assume: ${{ vars.OIDC_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}
           role-skip-session-tagging: true
 
