@@ -43,6 +43,7 @@ const ShareForm = (props: Props) => {
           <Image
             alt="exampleCompany Logo"
             src="/dojo-logo-sm.png"
+            // src="/chico.png"
             width="400px"
             height="400px"
           />
