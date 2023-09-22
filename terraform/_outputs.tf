@@ -22,3 +22,8 @@ output "ecs_service_arn" {
   value       = aws_ecs_service.knowledgeshare_ui_service.id
   description = "ARN of the ECS Service"
 }
+
+output "front_end_dns_name" {
+  description = "The DNS name of the front end load balancer"
+  value = aws_lb.front_end.dns_name
+}
