@@ -29,16 +29,20 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_role_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_cloudwatch_log_group" "keyless_demo_cw" {
+  name = "/ecs/keless-workflow-demo"
+}
+
 resource "aws_ecs_task_definition" "knowledgeshare_ui_task" {
   family                   = "keyless-workflow-demo-td"
   network_mode             = "awsvpc" # FARGATE requires awsvpc from what I can tell
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "1024"                              # Choose based on your requirements
-  memory                   = "2048"                              # Choose based on your requirements
+  cpu                      = "1024"
+  memory                   = "2048"
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn # FARGATE also requires this role to fetch images from ECR
 
   container_definitions = jsonencode([{
-    name      = "knowledgeshare-ui" # TODO make this a variable that can be made into output so we can fetch programatically
+    name      = "knowledgeshare-ui"
     image     = "${aws_ecr_repository.knowledgeshare_ui_ecr.repository_url}:latest"
     essential = true
     portMappings = [
@@ -47,6 +51,14 @@ resource "aws_ecs_task_definition" "knowledgeshare_ui_task" {
         hostPort      = 3000
       }
     ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = aws_cloudwatch_log_group.keyless_demo_cw.name
+        awslogs-region        = var.aws_region
+        awslogs-stream-prefix = "ecs"
+      }
+    }
   }])
 }
 
