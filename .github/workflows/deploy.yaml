@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      # Checkout this repo to the ephemeral runner
       - uses: actions/checkout@v3
 
       # Install the terraform and terragrunt
@@ -24,6 +25,7 @@ jobs:
           terraform: latest
           terragrunt: latest
 
+      # Authenticate with AWS and install AWS cli
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -39,11 +41,12 @@ jobs:
         run: |
           aws sts get-caller-identity
 
+      # Install tool for parsing JSON on the command-line
       - name: Install jq
         run: |
           sudo apt install jq tree
 
-      ## Fetch output from our terraform
+      # Fetch output from terraform
       - name: Pull Terraform output into GitHub Action ENV
         run: |
           terragrunt output --json > tmp_output.json
@@ -53,10 +56,6 @@ jobs:
           echo "ecs_cluster_arn=$(jq .ecs_cluster_arn.value -r < tmp_output.json)" >> $GITHUB_ENV
           rm tmp_output.json
         working-directory: terraform
-
-      - name: Fetch ECS Repo Url
-        run: |
-          echo "${{ env.ecr_repository_url }}"
 
       # Build docker image
       - name: Set up Docker Buildx
@@ -72,15 +71,13 @@ jobs:
           push: true
           tags: ${{ env.ecr_repository_url }}:latest , ${{ env.ecr_repository_url }}:${{ github.sha }}
 
+      # Fetch ECS task definition to update the running container
       - name: Pull task-definition.json to update ECS cluster
         id: pull-ecs-task-definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.ecs_task_arn }} --region ${{ env.AWS_REGION }} --output json | jq .taskDefinition >> task-definition.json
 
-      - name: Check what task-definition.json looks like
-        run: |
-          cat task-definition.json
-
+      # Update the task definition to point to newly built image
       - name: Render Amazon ECS task definition
         id: render-web-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -90,10 +87,11 @@ jobs:
           image: ${{ env.ecr_repository_url }}:${{ github.sha }}
           environment-variables: "LOG_LEVEL=info"
 
+      # Deploy the updated task-definition
       - name: Deploy to Amazon ECS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.render-web-container.outputs.task-definition }}
           service: ${{ env.ecs_service_arn }}
           cluster: ${{ env.ecs_cluster_arn }}
-          force-new-deployment: true
+          force-new-deployment: true # Forces ECS to only have a single running task
