@@ -16,18 +16,18 @@ jobs:
     environment: production
     steps:
       # Checkout this repo to the ephemeral runner
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       # Install the terraform and terragrunt
-      - uses: alexellis/setup-arkade@v1
-      - uses: alexellis/arkade-get@master
+      - uses: alexellis/setup-arkade@fd34ea3b1f8fa1a6e7e3c1a3b015aa81b95ea9cb # v1
+      - uses: alexellis/arkade-get@c53b95fac52d9a11069a76e1bc45e40a0b22d3e4 # tested sha off master
         with:
           terraform: latest
           terragrunt: latest
 
       # Authenticate with AWS and install AWS cli
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@50ac8dd1e1b10d09dac7b8727528b91bed831ac0 # v3
         with:
           aws-access-key-id: ${{ secrets.PERSONAL_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.PERSONAL_SECRET_ACCESS_KEY }}
@@ -59,14 +59,14 @@ jobs:
 
       # Build docker image
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@2fc7aceee09e9e4a7105c0d060c656fad0b4f63d # v1
 
       - name: Build and push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4
         with:
           push: true
           tags: ${{ env.ecr_repository_url }}:latest , ${{ env.ecr_repository_url }}:${{ github.sha }}
@@ -80,7 +80,7 @@ jobs:
       # Update the task definition to point to newly built image
       - name: Render Amazon ECS task definition
         id: render-web-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        uses: aws-actions/amazon-ecs-render-task-definition@61b0c00c3743b70987a73a1faf577f0d167d1574 # v1
         with:
           task-definition: task-definition.json
           container-name: knowledgeshare-ui
@@ -89,7 +89,7 @@ jobs:
 
       # Deploy the updated task-definition
       - name: Deploy to Amazon ECS service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a # v1
         with:
           task-definition: ${{ steps.render-web-container.outputs.task-definition }}
           service: ${{ env.ecs_service_arn }}
