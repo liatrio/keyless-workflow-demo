@@ -1,15 +1,13 @@
-name: Build Infra
+name: Deploy
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch: {}
+      - demo
 
 # permissions:
 #   id-token: write # Needed to modify JWT token for OIDC
 #   contents: read # Needed for actions/checkout
-
 
 jobs:
   run:
