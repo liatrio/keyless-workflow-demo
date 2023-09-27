@@ -125,7 +125,9 @@ data "aws_iam_policy_document" "gha_trust_policy" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:liatrio/keyless-workflow-demo:environment:production"]
+      # This value will need to be updated to work on a fork of this repo
+      # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims
+      values   = ["repo:liatrio/keyless-workflow-demo:environment:demo"]
     }
   }
 }
