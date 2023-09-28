@@ -125,7 +125,7 @@ data "aws_iam_policy_document" "gha_trust_policy" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:liatrio/keyless-workflow-demo:environment:production"]
+      values   = ["repo:liatrio/keyless-workflow-demo:environment:demo"]
     }
   }
 }
