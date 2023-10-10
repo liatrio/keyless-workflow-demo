@@ -27,3 +27,8 @@ output "front_end_dns_name" {
   description = "The DNS name of the front end load balancer"
   value = aws_lb.front_end.dns_name
 }
+
+output "gha_role_arn" {
+  description = "ARN of the GitHub Action OIDC role"
+  value = aws_iam_role.gha_role.arn
+}
