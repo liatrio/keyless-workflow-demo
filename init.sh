@@ -49,7 +49,7 @@ then
     ${AWS_VAULT_PREFIX} terragrunt apply --auto-approve
 else
     # GITHUB_ORG is set, apply terraform with it
-    ${AWS_VAULT_PREFIX} terragrunt apply -var "github_org=$GITHUB_ORG" --auto-approve
+    ${AWS_VAULT_PREFIX} terragrunt apply -var "github_organization=$GITHUB_ORG" --auto-approve
 fi
 
 popd
