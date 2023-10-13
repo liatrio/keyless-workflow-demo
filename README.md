@@ -1,64 +1,41 @@
-# DevOps Knowledge Share DOB UI
+# OIDC Demo
 
-### Prerequisites
+This repo is intended to be a self contained demo of how to leverage OIDC in a workflow to authenticate with AWS and deploy a simple containerized application. This repo contains:
 
-- nvm (`brew install nvm`)
-- Node 16.x (`nvm install` & `nvm use` - These commands will read the `.nvmrc` file included in the project)
-- npm 8.x (`npm install -g npm@8`)
-- Docker Desktop
+* Simple Next-js application
+* Terraform module to create all required infrastructure (VPC, ECR, ECS Fargate Cluster, and an application LB)
+* Dockerfile to build the application
+* A GitHub Actions workflow to demonstrate deploying the docker image to an ECS cluster
+## Setup
+### For MacOS
+run `brew bundle` to install dependencies
 
-### Run locally
+### For Windows (untested)
+```π
+# Install AWS CLI
+choco install awscli
 
-1. Change your working directory to application root folder
+# Install Terraform
+choco install terraform
 
-2. Install dependencies using below command
+# Install Terragrunt
+choco install terragrunt
+```
+### Configure AWS CLI
+Follow these instructions to configure AWS CLI. https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
 
-   ```bash
-   npm install
-   ```
 
-3. Start the DevOps Knowledge Share API locally. Set the `KNOWLEDGE_SHARE_API` environment variable for API communication.
+## Initialize
+When running this at home you will need to provide your own 'organization' so that the trust policy on the IAM role will allow your workflow to run.
+This can be done by running `init.sh <organization>`. Simply replace `<organization>` with your username. So if you fork the repo and the url for your repo is,
+`https://github.com/jburns24/keyless-workflow-demo` then you would run `init.sh jburns24`.
 
-   ```bash
-   # if running on Host machine
-   export KNOWLEDGE_SHARE_API=http://localhost:8080
+After this finishes you will see a DNS name output as `front_end_dns_name`. Copy that DNS name and hit it in a browser. If you get a 503 Service Not Available you were too fast, just give it a min and refresh.
 
-   # if running on Remote Container such as VS Code
-   export KNOWLEDGE_SHARE_API=<your host machine ip>
+After the init script runs copy the output of `gha_role_arn`. Then go to GitHub > Settings > Secrets and variables > Actions. In here create a *Variable* named `OIDC_ROLE` and popualte it with the value you copied for `gha_role_arn`.
 
-   # for example, docker is
-   export KNOWLEDGE_SHARE_API=http://host.docker.internal:8080
-   ```
 
-4. To run the application with hot reloading, run the below command
+## Clean up
+To save on money make sure you do not leave your AWS resources up and running. To do this navigate to the `terraform` directory and run `terragrunt destroy`. You will be prompted to confirm the deletion and that is it!
 
-   ```bash
-   npm run dev
-   ```
-
-5. Navigate to `http://localhost:3000` to view your application
-
-6. To execute testcases, run the below command
-
-   ```bash
-   npm run test
-   ```
-
-### Build and Run via Docker
-
-1. Make sure that you have [Docker Desktop installed](https://docs.docker.com/desktop/mac/install/) and you have it running
-
-2. Use the following command to build your Docker image
-
-   ```bash
-   # Note: the --platform flag is required for building on Apple Silicon
-   docker build -t <repo>/devops-knowledge-share-ui . --platform linux/amd64
-   ```
-
-3. Use the following command to start the container with port `3000` forwarded to your local machine
-
-   ```bash
-   docker run -e KNOWLEDGE_SHARE_API=http://host.docker.internal:8080 -p 3000:3000 -it <repo>/devops-knowledge-share-ui
-   ```
-
-4. Navigate to `http://localhost:3000` to view your application
+Hope you find this informative and if there are bugs please open and issue and I will try to address them. Pull requests are also welcome!

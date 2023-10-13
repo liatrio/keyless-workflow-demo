@@ -1,26 +1,27 @@
-## Uncomment this block of code if you are testing this in a personal aws account
-## This is a central resource that in my org is not managed via terraform and thus
-## including this resouce causes issues.
-# resource "aws_iam_openid_connect_provider" "github" {
-#   url = "https://token.actions.githubusercontent.com"
+# Purpose: Create an OIDC provider for Github Actions to use to assume a role in AWS
+data "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+}
 
-#   # All roles go here.
-#   # You can find these in the audience of the Github OIDC tokens
-#   client_id_list = ["sts.amazonaws.com"]
+resource "aws_iam_openid_connect_provider" "github" {
+  # Only create the provider if it doesn't already exist
+  count = length(data.aws_iam_openid_connect_provider.github) == 0 ? 1 : 0
 
-#   thumbprint_list = [
-#     data.tls_certificate.github_thumbprint.certificates[0].sha1_fingerprint
-#   ]
-# }
+  url = "https://token.actions.githubusercontent.com"
+
+  # You can find these in the audience of the Github OIDC tokens
+  client_id_list = ["sts.amazonaws.com"]
+
+  thumbprint_list = [
+    data.tls_certificate.github_thumbprint.certificates[0].sha1_fingerprint
+  ]
+}
 
 data "tls_certificate" "github_thumbprint" {
   url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
 }
 
-data "aws_iam_openid_connect_provider" "github" {
-  url = "https://token.actions.githubusercontent.com"
-}
-
+# Purpose: Create a policy that gives permissions on specific ECS and ECR resources
 resource "aws_iam_policy" "ecs_ecr_policy" {
   name        = "ecr_ecs_policy"
   description = "Policy that gives permissions on specific ECS and ECR resources"
@@ -34,9 +35,9 @@ resource "aws_iam_policy" "ecs_ecr_policy" {
           "ecs:*"
         ],
         Resource = [
-          var.ecs_cluster_arn,   # ARN of the ECS cluster
-          var.ecs_service_arn,   # ARN of the ECS service
-          replace(var.ecs_task_arn, "/:\\d+$/", ":*")   # ARN that matches all task-definition revisions for the task definition created in this repo
+          aws_ecs_cluster.knowledgeshare_ui_ecs_cluster.arn,   # ARN of the ECS cluster
+          aws_ecs_service.knowledgeshare_ui_service.id,   # ARN of the ECS service
+          replace(data.aws_ecs_task_definition.current_task.arn, "/:\\d+$/", ":*")   # ARN that matches all task-definition revisions for the task definition created in this repo
         ]
       },
       {
@@ -69,13 +70,14 @@ resource "aws_iam_policy" "ecs_ecr_policy" {
           "ecr:*"
         ],
         Resource = [
-          var.ecr_repository_arn   # Replace 'example' with your ECR repository resource name
+          aws_ecr_repository.knowledgeshare_ui_ecr.arn
         ]
       }
     ]
   })
 }
 
+# Purpose: Create a policy that gives permissions to read the backend s3 bucket the tf state file is stored
 resource "aws_iam_policy" "terraform_read" {
   name        = "terraform_read"
   description = "Policy that gives permissions to access the backend s3 bucket the tf state file is stored"
@@ -109,6 +111,7 @@ resource "aws_iam_policy" "terraform_read" {
   })
 }
 
+# Purpose: Create a role that Github Actions can assume to deploy to ECS
 data "aws_iam_policy_document" "gha_trust_policy" {
   statement {
     actions = [
@@ -116,7 +119,6 @@ data "aws_iam_policy_document" "gha_trust_policy" {
       "sts:AssumeRoleWithWebIdentity"
     ]
 
-    # We use StringLike on the Arn to control this
     principals {
       type        = "Federated"
       identifiers = [data.aws_iam_openid_connect_provider.github.arn]
@@ -125,11 +127,12 @@ data "aws_iam_policy_document" "gha_trust_policy" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:liatrio/keyless-workflow-demo:environment:demo"]
+      values   = ["repo:${var.github_organization}/keyless-workflow-demo:environment:demo"]
     }
   }
 }
 
+# Purpose: Create a role that Github Actions can assume to deploy to ECS
 resource "aws_iam_role" "gha_role" {
   name                = "gha_role"
   assume_role_policy  = data.aws_iam_policy_document.gha_trust_policy.json

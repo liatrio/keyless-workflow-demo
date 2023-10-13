@@ -2,6 +2,13 @@
 
 set -e  # Exit script on any error
 
+# Grab first argument if there is one
+if [ $# -eq 1 ]
+then
+    # First argument expected to be the github org/username
+    GITHUB_ORG=$1
+fi
+
 # Define AWS region and profile
 AWS_REGION="us-east-2"
 AWS_PROFILE="admin-sandbox"
@@ -35,5 +42,14 @@ docker tag keyless-workflow-demo:latest $ECR_REPO_URL:latest
 docker push $ECR_REPO_URL:latest
 
 pushd terraform
-# Step 6: Apply the rest of the terraform
-${AWS_VAULT_PREFIX} terragrunt apply --auto-approve
+# Step 6: Apply the rest of the terraform passing github org as a variable if it was provided
+if [ -z ${GITHUB_ORG+x} ]
+then
+    # GITHUB_ORG is not set, apply terraform without it
+    ${AWS_VAULT_PREFIX} terragrunt apply --auto-approve
+else
+    # GITHUB_ORG is set, apply terraform with it
+    ${AWS_VAULT_PREFIX} terragrunt apply -var "github_organization=$GITHUB_ORG" --auto-approve
+fi
+
+popd
