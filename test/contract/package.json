@@ -7,7 +7,7 @@
     "@babel/preset-env": "^7.9.0",
     "@babel/register": "^7.9.0",
     "@pact-foundation/absolute-version": "^0.0.3",
-    "@pact-foundation/pact": "^9.18.1",
+    "@pact-foundation/pact": "^12.1.1",
     "babel-jest": "^27.0.6",
     "eslint": "^7.28.0",
     "jest": "^27.0.6",
